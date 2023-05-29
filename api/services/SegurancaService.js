@@ -13,7 +13,7 @@ class SegurancaService {
                 {
                     model: database.permissoes,
                     as: 'usuario_permissoes',
-                    attributes:['id', 'nome', 'descricao']
+                    attributes: ['id', 'nome', 'descricao']
                 }
             ],
             where: {
@@ -21,7 +21,7 @@ class SegurancaService {
             }
         })
 
-        if(!usuario){
+        if (!usuario) {
             throw new Error('Usuario não cadastrado!')
         }
 
@@ -39,7 +39,7 @@ class SegurancaService {
                     [Sequelize.Op.in]: dto.permissoes
                 }
             }
-        })        
+        })
 
         await usuario.removeUsuario_roles(usuario.usuario_roles)
         await usuario.removeUsuario_permissoes(usuario.usuario_permissoes)
@@ -53,7 +53,7 @@ class SegurancaService {
                     model: database.roles,
                     as: 'usuario_roles',
                     attributes: ['id', 'nome', 'descricao']
-                }, 
+                },
                 {
                     model: database.permissoes,
                     as: 'usuario_permissoes',
@@ -67,6 +67,52 @@ class SegurancaService {
 
         return novoUsuario
 
+    }
+
+    async cadastrarPermissoesRoles(dto) {
+        const role = await database.roles.findOne({
+            include: [
+                {
+                    model: database.permissoes,
+                    as: 'roles_das_permissoes',
+                    attributes: ['id', 'nome', 'descricao']
+                }
+            ],
+            where: {
+                id: dto.roleId
+            }
+        })
+
+        if (!role) {
+            throw new Error('Role não cadastrada')
+        }
+        
+        const permissoesCadastradas = await database.permissoes.findAll({
+            where: {
+                id: {
+                    [Sequelize.Op.in]: dto.permissoes
+                }
+            }
+        })
+        
+        await role.removeRoles_das_permissoes(role.roles_das_permissoes)
+
+        await role.addRoles_das_permissoes(permissoesCadastradas)
+
+        const novaRole = await database.roles.findOne({
+            include: [
+                {
+                    model: database.permissoes,
+                    as: 'roles_das_permissoes',
+                    attributes: ['id', 'nome', 'descricao']
+                }
+            ],
+            where: {
+                id: dto.roleId
+            }
+        })
+
+        return novaRole
     }
 
 
