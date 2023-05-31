@@ -68,7 +68,6 @@ class SegurancaService {
         return novoUsuario
 
     }
-
     async cadastrarPermissoesRoles(dto) {
         const role = await database.roles.findOne({
             include: [
@@ -86,7 +85,7 @@ class SegurancaService {
         if (!role) {
             throw new Error('Role não cadastrada')
         }
-        
+
         const permissoesCadastradas = await database.permissoes.findAll({
             where: {
                 id: {
@@ -94,7 +93,7 @@ class SegurancaService {
                 }
             }
         })
-        
+
         await role.removeRoles_das_permissoes(role.roles_das_permissoes)
 
         await role.addRoles_das_permissoes(permissoesCadastradas)
@@ -114,8 +113,6 @@ class SegurancaService {
 
         return novaRole
     }
-
-
 }
 
 module.exports = SegurancaService;
